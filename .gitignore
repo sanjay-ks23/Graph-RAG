@@ -1,0 +1,78 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual Environment
+venv/
+env/
+ENV/
+.venv
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Environment Variables
+.env
+
+# Data Files
+data/graph_db.pkl
+data/vector_store.index
+data/vector_metadata.pkl
+data/feedback.jsonl
+data/interactions.jsonl
+data/therapy_books/*.pdf
+data/therapy_books/*.epub
+data/therapy_books/*.docx
+
+# Logs
+logs/
+*.log
+
+# Cache
+cache/
+*.cache
+.cache/
+
+# Models (if downloaded locally)
+models/
+
+# Jupyter Notebooks
+.ipynb_checkpoints/
+*.ipynb
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+
+# OS
+Thumbs.db
+.DS_Store
+
+# Temporary files
+*.tmp
+*.bak
+*.swp
