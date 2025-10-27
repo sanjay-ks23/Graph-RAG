@@ -1,0 +1,34 @@
+torch>=2.0.0
+transformers>=4.40.0
+sentence-transformers>=2.5.0
+accelerate>=0.27.0
+bitsandbytes>=0.43.0
+
+# Graph and Vector Store
+networkx>=3.1
+faiss-cpu>=1.8.0  # Use faiss-gpu if CUDA available
+numpy>=1.24.0
+scipy>=1.10.0
+
+# NLP and Text Processing
+spacy>=3.7.0
+nltk>=3.8.0
+pypdf2>=3.0.0
+ebooklib>=0.18
+python-docx>=1.1.0
+
+# Web Framework
+flask>=3.0.0
+flask-cors>=4.0.0
+flask-socketio>=5.3.0
+python-socketio>=5.11.0
+
+# Data Processing
+pandas>=2.0.0
+pyyaml>=6.0
+jsonlines>=4.0.0
+tqdm>=4.66.0
+
+# Utilities
+python-dotenv>=1.0.0
+requests>=2.31.0

@@ -1,0 +1,117 @@
+# Graph RAG Psychotherapy Chatbot Configuration
+
+# Model Configuration
+models:
+  llm:
+    model_id: "google/gemma-3n-e2b-it"  # Gemma 3n E2B-it
+    device: "cuda"  # or "cpu"
+    max_length: 8192
+    temperature: 0.7
+    top_p: 0.9
+    top_k: 40
+    
+  embedding:
+    model_id: "google/embeddinggemma-300M"
+    device: "cuda"
+    batch_size: 32
+    max_seq_length: 512
+
+# Graph Database Configuration
+graph_db:
+  type: "networkx"  # Can be extended to Neo4j
+  persist_path: "data/graph_db.pkl"
+  
+# Vector Store Configuration
+vector_store:
+  type: "faiss"
+  dimension: 768
+  index_type: "IVF"
+  nlist: 100
+  persist_path: "data/vector_store.index"
+  metadata_path: "data/vector_metadata.pkl"
+
+# Data Ingestion
+data:
+  books_directory: "data/therapy_books"
+  supported_formats: ["pdf", "txt", "epub"]
+  chunk_size: 512
+  chunk_overlap: 50
+
+# Graph Construction
+graph:
+  entity_types:
+    - "therapeutic_technique"
+    - "emotion"
+    - "behavior"
+    - "cognitive_pattern"
+    - "coping_strategy"
+    - "developmental_stage"
+    - "cultural_context"
+  
+  relationship_types:
+    - "treats"
+    - "causes"
+    - "relates_to"
+    - "appropriate_for_age"
+    - "cultural_adaptation"
+    - "precedes"
+    - "contradicts"
+  
+  min_entity_confidence: 0.6
+  max_entities_per_chunk: 10
+
+# Retrieval Configuration
+retrieval:
+  top_k_chunks: 5
+  top_k_graph_nodes: 10
+  similarity_threshold: 0.7
+  graph_traversal_depth: 2
+  rerank: true
+
+# Conversation Management
+conversation:
+  max_history_turns: 10
+  context_window_tokens: 6144  # Leave room for response
+  memory_summarization_threshold: 8
+  session_timeout_minutes: 30
+
+# Therapeutic Settings
+therapy:
+  target_age_range: [0, 18]
+  cultural_context: "indian"
+  empathy_level: "high"
+  safety_filters: true
+  crisis_keywords:
+    - "suicide"
+    - "self-harm"
+    - "abuse"
+    - "hurt myself"
+  
+  therapeutic_principles:
+    - "active_listening"
+    - "validation"
+    - "age_appropriate_language"
+    - "cultural_sensitivity"
+    - "strengths_based"
+
+# Self-Learning Configuration
+learning:
+  feedback_storage: "data/feedback.jsonl"
+  enable_learning: true
+  update_frequency: 100  # Update after N interactions
+  learning_rate: 0.01
+  quality_threshold: 4.0  # Out of 5
+
+# System Paths
+paths:
+  data_dir: "data"
+  models_dir: "models"
+  logs_dir: "logs"
+  cache_dir: "cache"
+
+# Logging
+logging:
+  level: "INFO"
+  file: "logs/graph_rag.log"
+  max_bytes: 10485760  # 10MB
+  backup_count: 5
