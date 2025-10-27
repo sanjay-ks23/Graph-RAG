@@ -2,7 +2,7 @@
 
 import spacy
 import re
-from typing import List, Dict, Tuple, Set
+from typing import List, Dict, Tuple, Set, Any
 from collections import defaultdict
 from src.utils.logger import setup_logger
 
