@@ -13,7 +13,7 @@ models:
   embedding:
     model_id: "google/embeddinggemma-300M"
     device: "cuda"
-    batch_size: 32
+    batch_size: 16  # Reduced from 32 to save memory
     max_seq_length: 512
 
 # Graph Database Configuration

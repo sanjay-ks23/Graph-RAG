@@ -8,6 +8,7 @@ from pathlib import Path
 
 from src.utils.config_loader import ConfigLoader
 from src.utils.logger import setup_logger
+from src.utils.memory_utils import clear_cuda_cache, set_memory_efficient_mode, log_gpu_memory
 from src.llm.gemma_model import GemmaModel
 from src.embedding.embedding_model import EmbeddingModel
 from src.graph.graph_builder import GraphBuilder
@@ -37,6 +38,11 @@ def initialize_system():
     global config_loader, chat_service, session_manager, feedback_system, interaction_logger
     
     logger.info("Initializing Graph RAG Psychotherapy System...")
+    
+    # Set memory-efficient mode
+    set_memory_efficient_mode()
+    clear_cuda_cache()
+    log_gpu_memory()
     
     # Load configuration
     config_loader = ConfigLoader()

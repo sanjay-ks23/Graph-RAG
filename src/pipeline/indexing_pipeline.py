@@ -8,6 +8,7 @@ from src.graph.graph_builder import GraphBuilder
 from src.embedding.embedding_model import EmbeddingModel
 from src.vector_store.faiss_store import FAISSVectorStore
 from src.utils.logger import setup_logger
+from src.utils.memory_utils import clear_cuda_cache, log_gpu_memory, set_memory_efficient_mode
 
 logger = setup_logger(__name__)
 
@@ -61,6 +62,13 @@ class IndexingPipeline:
         logger.info("Starting Graph RAG Indexing Pipeline")
         logger.info("=" * 60)
         
+        # Set memory-efficient mode
+        set_memory_efficient_mode()
+        
+        # Clear CUDA cache at start
+        clear_cuda_cache()
+        log_gpu_memory()
+        
         # Step 1: Load documents
         logger.info("\n[1/5] Loading documents...")
         documents = self.document_loader.load_all_documents()
@@ -104,12 +112,19 @@ class IndexingPipeline:
         graph_stats = self.graph_builder.get_statistics()
         logger.info(f"Graph built: {graph_stats}")
         
+        # Clear cache before embeddings
+        clear_cuda_cache()
+        log_gpu_memory()
+        
         # Step 4: Generate embeddings
         logger.info("\n[4/5] Generating embeddings...")
         chunk_texts = [chunk['text'] for chunk in all_chunks]
         embeddings = self.embedding_model.encode_batch(chunk_texts, show_progress=True)
         
         logger.info(f"Generated {len(embeddings)} embeddings")
+        
+        # Clear cache after embeddings
+        clear_cuda_cache()
         
         # Step 5: Index embeddings
         logger.info("\n[5/5] Indexing embeddings...")

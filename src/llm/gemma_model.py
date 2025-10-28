@@ -20,6 +20,11 @@ class GemmaModel:
         self.top_p = top_p
         self.top_k = top_k
         
+        # Clear CUDA cache before loading model
+        if self.device == "cuda" and torch.cuda.is_available():
+            torch.cuda.empty_cache()
+            logger.info("Cleared CUDA cache before loading Gemma model")
+        
         logger.info(f"Loading Gemma model: {model_id} on {self.device}")
         
         # Load tokenizer
@@ -42,6 +47,10 @@ class GemmaModel:
     def generate_response(self, messages: List[Dict[str, str]], 
                          max_new_tokens: int = 512) -> str:
         """Generate response using chat format"""
+        
+        # Clear CUDA cache before generation
+        if self.device == "cuda" and torch.cuda.is_available():
+            torch.cuda.empty_cache()
         
         # Format messages for Gemma
         formatted_prompt = self._format_chat(messages)
@@ -72,6 +81,10 @@ class GemmaModel:
             outputs[0][inputs['input_ids'].shape[1]:],
             skip_special_tokens=True
         )
+        
+        # Clear cache after generation
+        if self.device == "cuda" and torch.cuda.is_available():
+            torch.cuda.empty_cache()
         
         return response.strip()
     
