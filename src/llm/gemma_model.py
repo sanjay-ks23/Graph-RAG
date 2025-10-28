@@ -10,7 +10,7 @@ logger = setup_logger(__name__)
 class GemmaModel:
     """Gemma 3n E2B-it model for therapeutic conversations"""
     
-    def __init__(self, model_id: str = "google/gemma-2-2b-it",
+    def __init__(self, model_id: str = "google/gemma-3n-e2b-it",
                  device: str = "cuda", max_length: int = 8192,
                  temperature: float = 0.7, top_p: float = 0.9, top_k: int = 40):
         self.model_id = model_id

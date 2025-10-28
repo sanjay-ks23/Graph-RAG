@@ -41,9 +41,15 @@ def log_gpu_memory():
 def set_memory_efficient_mode():
     """Set PyTorch to memory-efficient mode"""
     if torch.cuda.is_available():
-        # Enable TF32 for better performance on Ampere GPUs
-        torch.backends.cuda.matmul.allow_tf32 = True
-        torch.backends.cudnn.allow_tf32 = True
+        # Enable TF32 for better performance on Ampere GPUs (using new API)
+        try:
+            # New API (PyTorch 2.9+)
+            torch.backends.cuda.matmul.fp32_precision = 'tf32'
+            torch.backends.cudnn.conv.fp32_precision = 'tf32'
+        except AttributeError:
+            # Fallback to old API for older PyTorch versions
+            torch.backends.cuda.matmul.allow_tf32 = True
+            torch.backends.cudnn.allow_tf32 = True
         
         # Enable cudnn benchmarking for better performance
         torch.backends.cudnn.benchmark = True
