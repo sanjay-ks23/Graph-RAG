@@ -2,8 +2,9 @@
 
 import torch
 from transformers import AutoTokenizer, AutoModelForCausalLM
-from typing import List, Dict, Any
+from typing import List, Dict
 from src.utils.logger import setup_logger
+from src.utils.memory_utils import with_memory_cleanup, clear_cuda_cache
 
 logger = setup_logger(__name__)
 
@@ -20,37 +21,48 @@ class GemmaModel:
         self.top_p = top_p
         self.top_k = top_k
         
-        # Clear CUDA cache before loading model
-        if self.device == "cuda" and torch.cuda.is_available():
-            torch.cuda.empty_cache()
-            logger.info("Cleared CUDA cache before loading Gemma model")
-        
+        clear_cuda_cache()
         logger.info(f"Loading Gemma model: {model_id} on {self.device}")
         
         # Load tokenizer
         self.tokenizer = AutoTokenizer.from_pretrained(model_id)
         
-        # Load model
-        self.model = AutoModelForCausalLM.from_pretrained(
-            model_id,
-            torch_dtype=torch.float16 if self.device == "cuda" else torch.float32,
-            device_map="auto" if self.device == "cuda" else None,
-            low_cpu_mem_usage=True
-        )
-        
-        if self.device == "cpu":
+        # Load model with proper device handling
+        if self.device == "cuda":
+            try:
+                # Try 8-bit quantization first (requires bitsandbytes)
+                self.model = AutoModelForCausalLM.from_pretrained(
+                    model_id,
+                    load_in_8bit=True,
+                    device_map="auto",
+                    low_cpu_mem_usage=True
+                )
+                logger.info("Loaded model with 8-bit quantization")
+            except Exception as e:
+                logger.warning(f"8-bit loading failed: {e}. Falling back to float16")
+                # Fallback to float16 with memory limit
+                self.model = AutoModelForCausalLM.from_pretrained(
+                    model_id,
+                    dtype=torch.float16,
+                    device_map="auto",
+                    low_cpu_mem_usage=True,
+                    max_memory={0: "6GB", "cpu": "8GB"}
+                )
+        else:
+            self.model = AutoModelForCausalLM.from_pretrained(
+                model_id,
+                dtype=torch.float32,
+                low_cpu_mem_usage=True
+            )
             self.model = self.model.to(self.device)
         
         self.model.eval()
         logger.info("Gemma model loaded successfully")
     
+    @with_memory_cleanup
     def generate_response(self, messages: List[Dict[str, str]], 
                          max_new_tokens: int = 512) -> str:
         """Generate response using chat format"""
-        
-        # Clear CUDA cache before generation
-        if self.device == "cuda" and torch.cuda.is_available():
-            torch.cuda.empty_cache()
         
         # Format messages for Gemma
         formatted_prompt = self._format_chat(messages)
@@ -63,7 +75,7 @@ class GemmaModel:
             max_length=self.max_length - max_new_tokens
         ).to(self.device)
         
-        # Generate
+        # Generate with memory-efficient settings
         with torch.no_grad():
             outputs = self.model.generate(
                 **inputs,
@@ -73,7 +85,8 @@ class GemmaModel:
                 top_k=self.top_k,
                 do_sample=True,
                 pad_token_id=self.tokenizer.eos_token_id,
-                eos_token_id=self.tokenizer.eos_token_id
+                eos_token_id=self.tokenizer.eos_token_id,
+                use_cache=True  # Enable KV cache for memory efficiency
             )
         
         # Decode
@@ -82,10 +95,7 @@ class GemmaModel:
             skip_special_tokens=True
         )
         
-        # Clear cache after generation
-        if self.device == "cuda" and torch.cuda.is_available():
-            torch.cuda.empty_cache()
-        
+        del inputs, outputs
         return response.strip()
     
     def _format_chat(self, messages: List[Dict[str, str]]) -> str:

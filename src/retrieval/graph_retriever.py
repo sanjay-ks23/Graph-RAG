@@ -64,15 +64,15 @@ class GraphRetriever:
                         vector_results: List[Dict[str, Any]]) -> Dict[str, Any]:
         """Retrieve graph context based on query and vector results"""
         
-        # Extract entities from query
-        from src.graph.entity_extractor import EntityExtractor
-        entity_extractor = EntityExtractor(
-            entity_types=['therapeutic_technique', 'emotion', 'behavior', 
-                         'cognitive_pattern', 'coping_strategy'],
-            relationship_types=['treats', 'causes', 'relates_to']
-        )
+        if not hasattr(self, '_entity_extractor'):
+            from src.graph.entity_extractor import EntityExtractor
+            self._entity_extractor = EntityExtractor(
+                entity_types=['therapeutic_technique', 'emotion', 'behavior', 
+                             'cognitive_pattern', 'coping_strategy'],
+                relationship_types=['treats', 'causes', 'relates_to']
+            )
         
-        query_entities = entity_extractor.extract_entities(query)
+        query_entities = self._entity_extractor.extract_entities(query)
         
         # Find relevant graph nodes
         relevant_nodes = set()

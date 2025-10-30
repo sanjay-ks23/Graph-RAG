@@ -5,15 +5,15 @@ models:
   llm:
     model_id: "google/gemma-3n-e2b-it"  # Gemma 3n E2B-it
     device: "cuda"  # or "cpu"
-    max_length: 8192
+    max_length: 4096  # Reduced from 8192 to save memory
     temperature: 0.7
     top_p: 0.9
     top_k: 40
     
   embedding:
     model_id: "google/embeddinggemma-300M"
-    device: "cuda"
-    batch_size: 16  # Reduced from 32 to save memory
+    device: "cpu"  # Use CPU to free GPU memory for LLM
+    batch_size: 32  # Can increase on CPU
     max_seq_length: 512
 
 # Graph Database Configuration

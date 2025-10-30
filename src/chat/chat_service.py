@@ -1,12 +1,19 @@
 """Main chat service integrating all components"""
 
-from typing import Dict, Any, List
+from typing import Dict, Any
 from src.llm.gemma_model import GemmaModel
 from src.retrieval.graph_retriever import GraphRetriever
 from src.conversation.memory_manager import ConversationMemory
 from src.utils.logger import setup_logger
 
 logger = setup_logger(__name__)
+
+EMOTION_KEYWORDS = {
+    'anxiety': ['anxious', 'worried', 'nervous', 'scared', 'fear'],
+    'sadness': ['sad', 'depressed', 'down', 'unhappy', 'cry'],
+    'anger': ['angry', 'mad', 'frustrated', 'annoyed'],
+    'stress': ['stressed', 'overwhelmed', 'pressure']
+}
 
 class ChatService:
     """Therapeutic chat service with Graph RAG"""
@@ -166,18 +173,10 @@ Your safety and wellbeing are the most important things."""
     
     def _extract_primary_emotion(self, message: str) -> str:
         """Extract primary emotion from message"""
-        emotions = {
-            'anxiety': ['anxious', 'worried', 'nervous', 'scared', 'fear'],
-            'sadness': ['sad', 'depressed', 'down', 'unhappy', 'cry'],
-            'anger': ['angry', 'mad', 'frustrated', 'annoyed'],
-            'stress': ['stressed', 'overwhelmed', 'pressure']
-        }
-        
         message_lower = message.lower()
-        for emotion, keywords in emotions.items():
+        for emotion, keywords in EMOTION_KEYWORDS.items():
             if any(keyword in message_lower for keyword in keywords):
                 return emotion
-        
         return None
     
     def reset_conversation(self):

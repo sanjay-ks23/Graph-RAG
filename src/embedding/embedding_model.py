@@ -5,6 +5,7 @@ import numpy as np
 from sentence_transformers import SentenceTransformer
 from typing import List, Union
 from src.utils.logger import setup_logger
+from src.utils.memory_utils import clear_cuda_cache, with_memory_cleanup
 
 logger = setup_logger(__name__)
 
@@ -17,11 +18,7 @@ class EmbeddingModel:
         self.device = device if torch.cuda.is_available() else "cpu"
         self.batch_size = batch_size
         
-        # Clear CUDA cache before loading model
-        if self.device == "cuda" and torch.cuda.is_available():
-            torch.cuda.empty_cache()
-            logger.info("Cleared CUDA cache")
-        
+        clear_cuda_cache()
         logger.info(f"Loading embedding model: {model_id} on {self.device}")
         self.model = SentenceTransformer(model_id).to(device=self.device)
         self.embedding_dim = self.model.get_sentence_embedding_dimension()
@@ -43,12 +40,10 @@ class EmbeddingModel:
         
         return embeddings
     
+    @with_memory_cleanup
     def encode_batch(self, texts: List[str], 
                     show_progress: bool = True) -> np.ndarray:
         """Encode batch of texts"""
-        # Clear cache before large batch operations
-        if self.device == "cuda" and torch.cuda.is_available():
-            torch.cuda.empty_cache()
         return self.encode(texts, show_progress=show_progress)
     
     def get_similarity(self, text1: str, text2: str) -> float:

@@ -1,9 +1,12 @@
 """Flask web application for Graph RAG Psychotherapy Chatbot"""
 
+# MUST set CUDA allocator config BEFORE importing torch
+import os
+os.environ['PYTORCH_CUDA_ALLOC_CONF'] = 'expandable_segments:True'
+
 from flask import Flask, render_template, request, jsonify, session
 from flask_cors import CORS
 import uuid
-import os
 from pathlib import Path
 
 from src.utils.config_loader import ConfigLoader
@@ -14,32 +17,27 @@ from src.embedding.embedding_model import EmbeddingModel
 from src.graph.graph_builder import GraphBuilder
 from src.vector_store.faiss_store import FAISSVectorStore
 from src.retrieval.graph_retriever import GraphRetriever
-from src.conversation.memory_manager import ConversationMemory, SessionManager
+from src.conversation.memory_manager import SessionManager
 from src.chat.chat_service import ChatService
 from src.feedback.learning_system import FeedbackSystem, InteractionLogger
 
-# Initialize Flask app
 app = Flask(__name__)
 app.secret_key = os.getenv('SECRET_KEY', 'your-secret-key-change-in-production')
 CORS(app)
 
-# Setup logger
 logger = setup_logger(__name__)
 
-# Global variables for components
 config_loader = None
-chat_service = None
 session_manager = None
 feedback_system = None
 interaction_logger = None
 
 def initialize_system():
     """Initialize all system components"""
-    global config_loader, chat_service, session_manager, feedback_system, interaction_logger
+    global config_loader, session_manager, feedback_system, interaction_logger
     
     logger.info("Initializing Graph RAG Psychotherapy System...")
     
-    # Set memory-efficient mode
     set_memory_efficient_mode()
     clear_cuda_cache()
     log_gpu_memory()
@@ -83,6 +81,11 @@ def initialize_system():
         similarity_threshold=config['retrieval']['similarity_threshold'],
         graph_traversal_depth=config['retrieval']['graph_traversal_depth']
     )
+    
+    # Clear CUDA cache aggressively before loading LLM
+    logger.info("Clearing CUDA cache before loading Gemma model...")
+    clear_cuda_cache()
+    log_gpu_memory()
     
     # Initialize LLM
     logger.info("Loading Gemma model...")

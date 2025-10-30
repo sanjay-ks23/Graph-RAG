@@ -1,10 +1,20 @@
 """Conversation memory and context management"""
 
+import re
+import time
 from typing import List, Dict, Any
 from collections import deque
 from src.utils.logger import setup_logger
 
 logger = setup_logger(__name__)
+
+EMOTIONS = ['anxious', 'worried', 'scared', 'angry', 'sad', 'happy', 
+            'excited', 'frustrated', 'lonely', 'confused']
+AGE_PATTERNS = [
+    r'i am (\d+) years? old',
+    r"i'm (\d+) years? old",
+    r'(\d+) years? old',
+]
 
 class ConversationMemory:
     """Manage conversation history and context"""
@@ -81,30 +91,26 @@ class ConversationMemory:
         """Extract and update user information from conversation"""
         user_message = turn['user'].lower()
         
-        # Extract age
-        import re
-        age_patterns = [
-            r'i am (\d+) years? old',
-            r"i'm (\d+) years? old",
-            r'(\d+) years? old',
-        ]
-        for pattern in age_patterns:
-            match = re.search(pattern, user_message)
+        self._extract_age(user_message)
+        self._extract_emotions(user_message)
+    
+    def _extract_age(self, message: str):
+        """Extract age from message"""
+        for pattern in AGE_PATTERNS:
+            match = re.search(pattern, message)
             if match:
                 age = int(match.group(1))
                 if 0 <= age <= 18:
                     self.user_profile['age'] = age
                     break
-        
-        # Extract emotions mentioned
-        emotions = ['anxious', 'worried', 'scared', 'angry', 'sad', 
-                   'happy', 'excited', 'frustrated', 'lonely', 'confused']
-        mentioned_emotions = [e for e in emotions if e in user_message]
+    
+    def _extract_emotions(self, message: str):
+        """Extract emotions from message"""
+        mentioned_emotions = [e for e in EMOTIONS if e in message]
         if mentioned_emotions:
             if 'emotions_mentioned' not in self.user_profile:
                 self.user_profile['emotions_mentioned'] = []
             self.user_profile['emotions_mentioned'].extend(mentioned_emotions)
-            # Keep only recent emotions
             self.user_profile['emotions_mentioned'] = \
                 self.user_profile['emotions_mentioned'][-10:]
     
@@ -178,7 +184,7 @@ class SessionManager:
             del self.sessions[session_id]
             logger.info(f"Expired session removed: {session_id}")
     
-    def _get_timestamp(self) -> float:
+    @staticmethod
+    def _get_timestamp() -> float:
         """Get current timestamp"""
-        import time
         return time.time()

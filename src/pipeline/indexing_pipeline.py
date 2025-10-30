@@ -62,10 +62,7 @@ class IndexingPipeline:
         logger.info("Starting Graph RAG Indexing Pipeline")
         logger.info("=" * 60)
         
-        # Set memory-efficient mode
         set_memory_efficient_mode()
-        
-        # Clear CUDA cache at start
         clear_cuda_cache()
         log_gpu_memory()
         
@@ -107,12 +104,10 @@ class IndexingPipeline:
             self.graph_builder.add_entities(entities, chunk_id, chunk['source'])
             self.graph_builder.add_relationships(relationships, chunk_id, chunk['source'])
         
-        # Save graph
         self.graph_builder.save()
         graph_stats = self.graph_builder.get_statistics()
         logger.info(f"Graph built: {graph_stats}")
         
-        # Clear cache before embeddings
         clear_cuda_cache()
         log_gpu_memory()
         
@@ -120,11 +115,7 @@ class IndexingPipeline:
         logger.info("\n[4/5] Generating embeddings...")
         chunk_texts = [chunk['text'] for chunk in all_chunks]
         embeddings = self.embedding_model.encode_batch(chunk_texts, show_progress=True)
-        
         logger.info(f"Generated {len(embeddings)} embeddings")
-        
-        # Clear cache after embeddings
-        clear_cuda_cache()
         
         # Step 5: Index embeddings
         logger.info("\n[5/5] Indexing embeddings...")
