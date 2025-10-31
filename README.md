@@ -4,7 +4,7 @@ A culturally-aware therapeutic chatbot for Indian children and adolescents using
 
 ## Overview
 
-This system combines Graph-based Retrieval Augmented Generation with a fine-tuned language model to provide empathetic, contextual, and culturally-sensitive therapeutic support for children. It builds knowledge graphs from therapy literature to understand relationships between therapeutic concepts.
+This system is built on knowledge graphs from therapy literature to understand relationships between therapeutic concepts.
 
 
 **Module Structure**
