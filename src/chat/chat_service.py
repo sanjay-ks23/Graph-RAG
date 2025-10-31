@@ -151,7 +151,9 @@ class ChatService:
                 prompt_parts.append(f"- {cultural['text']}")
         
         if not prompt_parts:
-            return "Use your therapeutic knowledge to respond empathetically."
+            # Even without RAG context, provide guidance
+            return """**Guidance**: Respond warmly and empathetically using your therapeutic training. 
+Focus on active listening, validation, and age-appropriate support for Indian children and adolescents."""
         
         return "\n".join(prompt_parts)
     
