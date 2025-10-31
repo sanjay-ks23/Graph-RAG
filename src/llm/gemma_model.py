@@ -1,7 +1,7 @@
 """Gemma 3n E2B-it model integration"""
 
 import torch
-from transformers import AutoTokenizer, AutoModelForCausalLM
+from transformers import AutoTokenizer, AutoModelForCausalLM, BitsAndBytesConfig
 from typing import List, Dict
 from src.utils.logger import setup_logger
 from src.utils.memory_utils import with_memory_cleanup, clear_cuda_cache
@@ -31,22 +31,29 @@ class GemmaModel:
         if self.device == "cuda":
             try:
                 # Try 8-bit quantization first (requires bitsandbytes)
+                quantization_config = BitsAndBytesConfig(
+                    load_in_8bit=True,
+                    llm_int8_threshold=6.0,
+                    llm_int8_has_fp16_weight=False
+                )
                 self.model = AutoModelForCausalLM.from_pretrained(
                     model_id,
-                    load_in_8bit=True,
+                    quantization_config=quantization_config,
                     device_map="auto",
-                    low_cpu_mem_usage=True
+                    low_cpu_mem_usage=True,
+                    max_memory={0: "5.5GB", "cpu": "16GB"}  # Reserve more headroom
                 )
                 logger.info("Loaded model with 8-bit quantization")
             except Exception as e:
-                logger.warning(f"8-bit loading failed: {e}. Falling back to float16")
-                # Fallback to float16 with memory limit
+                logger.warning(f"8-bit loading failed: {e}. Falling back to float16 with CPU offloading")
+                # Fallback to float16 with aggressive CPU offloading
                 self.model = AutoModelForCausalLM.from_pretrained(
                     model_id,
                     dtype=torch.float16,
                     device_map="auto",
                     low_cpu_mem_usage=True,
-                    max_memory={0: "6GB", "cpu": "8GB"}
+                    max_memory={0: "5GB", "cpu": "16GB"},  # Offload more to CPU
+                    offload_folder="cache/offload"  # Disk offloading if needed
                 )
         else:
             self.model = AutoModelForCausalLM.from_pretrained(
