@@ -54,6 +54,9 @@ class FAISSVectorStore:
         # Convert to float32
         embeddings = embeddings.astype('float32')
         
+        # Normalize embeddings for cosine similarity using L2 distance
+        faiss.normalize_L2(embeddings)
+        
         # Train index if needed
         if hasattr(self, 'is_trained') and not self.is_trained:
             if len(embeddings) >= self.nlist:
@@ -83,10 +86,14 @@ class FAISSVectorStore:
                threshold: float = None) -> List[Dict[str, Any]]:
         """Search for similar embeddings"""
         if self.index.ntotal == 0:
+            logger.warning("Vector store is empty - no embeddings to search")
             return []
         
         # Convert to float32 and reshape
         query_embedding = query_embedding.astype('float32').reshape(1, -1)
+        
+        # Normalize query embedding for cosine similarity
+        faiss.normalize_L2(query_embedding)
         
         # Search
         distances, indices = self.index.search(query_embedding, top_k)
@@ -97,8 +104,10 @@ class FAISSVectorStore:
             if idx == -1:  # No result found
                 continue
             
-            # Convert L2 distance to similarity score
-            similarity = 1 / (1 + dist)
+            # For normalized vectors, L2 distance relates to cosine similarity:
+            # cosine_sim = 1 - (L2_dist^2 / 2)
+            # Since embeddings are normalized, we can use this conversion
+            similarity = max(0.0, 1.0 - (dist ** 2) / 2.0)
             
             if threshold is None or similarity >= threshold:
                 result = {
