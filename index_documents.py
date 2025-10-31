@@ -1,5 +1,3 @@
-"""Script to index therapy books into Graph RAG system"""
-
 import argparse
 from src.utils.config_loader import ConfigLoader
 from src.pipeline.indexing_pipeline import IndexingPipeline
@@ -35,7 +33,6 @@ def main():
     
     # Print statistics
     stats = pipeline.get_statistics()
-    logger.info("\nFinal Statistics:")
     logger.info(f"Graph: {stats['graph']}")
     logger.info(f"Vector Store: {stats['vector_store']}")
 
