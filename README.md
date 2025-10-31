@@ -6,47 +6,6 @@ A culturally-aware therapeutic chatbot for Indian children and adolescents using
 
 This system combines Graph-based Retrieval Augmented Generation with a fine-tuned language model to provide empathetic, contextual, and culturally-sensitive therapeutic support for children. It builds knowledge graphs from therapy literature to understand relationships between therapeutic concepts.
 
-## Disclaimer
-
-This chatbot provides supportive conversations and is NOT a replacement for professional mental health care. For serious concerns, consult qualified mental health professionals.
-
-**Emergency Resources (India)**
-- Childline: 1098
-- AASRA: 91-22-27546669
-- iCall: 91-22-25521111
-
-## Key Features
-
-**Core Capabilities**
-- Graph RAG Architecture with knowledge graphs for relationship understanding
-- Deep contextual understanding through entity extraction and relationship mapping
-- Conversation memory management within model context window
-- Self-learning system with feedback mechanisms
-- Cultural adaptation for Indian demographic
-- Empathetic interaction designed for children
-
-**Technical Features**
-- Hybrid retrieval combining vector similarity and graph-based reasoning
-- Entity extraction for therapeutic techniques, emotions, behaviors, cognitive patterns
-- Relationship mapping between concepts
-- Crisis detection with appropriate support resources
-- Session management with automatic cleanup
-- Feedback loop for continuous improvement
-
-## Architecture
-
-**System Components**
-
-```
-Flask Web Interface
-        |
-   Chat Service Layer
-   /              \
-Graph RAG      Gemma 3n E2B-it
-Retrieval      LLM Generation
-   |
-Knowledge Graph + Vector Store + Embedding Model
-```
 
 **Module Structure**
 
@@ -87,12 +46,6 @@ PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
 - FP16 precision for CUDA operations
 - Memory-efficient model loading
 
-**Troubleshooting**
-
-For CUDA out-of-memory errors:
-1. Reduce batch size in `config.yaml`
-2. Move embedding model to CPU
-3. Use CPU for all models if necessary
 
 ## Installation
 
@@ -183,12 +136,6 @@ Edit `config.yaml` to customize model settings, graph construction, retrieval pa
 **Self-Learning**
 - User feedback is collected and analyzed for system improvement
 
-## Safety Features
-
-- Crisis detection for self-harm, abuse keywords
-- Emergency helpline numbers (Childline 1098, AASRA)
-- Age-appropriate language adjustment
-- Cultural sensitivity for Indian contexts
 
 ## Project Structure
 
@@ -219,15 +166,5 @@ Graph-RAG/
     └── feedback.jsonl     # Feedback data
 ```
 
-## Technology Stack
 
-- Gemma 3n E2B-it (LLM)
-- EmbeddingGemma (Embeddings)
-- NetworkX (Knowledge Graph)
-- FAISS (Vector Store)
-- Flask (Web Framework)
-- PyTorch, Transformers, spaCy
 
-## License
-
-MIT License
