@@ -1,19 +1,19 @@
-# Graph RAG Psychotherapy Chatbot Configuration
+
 
 # Model Configuration
 models:
   llm:
-    model_id: "google/gemma-3n-e2b-it"  # Gemma 3n E2B-it
+    model_id: "google/gemma-3n-e2b-it"
     device: "cuda"  # or "cpu"
-    max_length: 4096  # Reduced from 8192 to save memory
+    max_length: 512  
     temperature: 0.7
     top_p: 0.9
-    top_k: 40
+    top_k: 50
     
   embedding:
     model_id: "google/embeddinggemma-300M"
     device: "cpu"  # Use CPU to free GPU memory for LLM
-    batch_size: 32  # Can increase on CPU
+    batch_size: 8  
     max_seq_length: 512
 
 # Graph Database Configuration
@@ -64,14 +64,14 @@ graph:
 retrieval:
   top_k_chunks: 5
   top_k_graph_nodes: 10
-  similarity_threshold: 0.7
+  similarity_threshold: 0.5
   graph_traversal_depth: 2
   rerank: true
 
 # Conversation Management
 conversation:
   max_history_turns: 10
-  context_window_tokens: 6144  # Leave room for response
+  context_window_tokens: 6144  
   memory_summarization_threshold: 8
   session_timeout_minutes: 30
 
@@ -100,7 +100,7 @@ learning:
   enable_learning: true
   update_frequency: 100  # Update after N interactions
   learning_rate: 0.01
-  quality_threshold: 4.0  # Out of 5
+  quality_threshold: 4.5  # Out of 5
 
 # System Paths
 paths:
