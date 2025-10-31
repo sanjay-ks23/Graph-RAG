@@ -1,8 +1,7 @@
-"""Flask web application for Graph RAG Psychotherapy Chatbot"""
-
-# MUST set CUDA allocator config BEFORE importing torch
 import os
 os.environ['PYTORCH_CUDA_ALLOC_CONF'] = 'expandable_segments:True'
+# Fix for PyTorch CUDA timing bug
+os.environ['CUDA_LAUNCH_BLOCKING'] = '1'
 
 from flask import Flask, render_template, request, jsonify, session
 from flask_cors import CORS
@@ -22,7 +21,7 @@ from src.chat.chat_service import ChatService
 from src.feedback.learning_system import FeedbackSystem, InteractionLogger
 
 app = Flask(__name__)
-app.secret_key = os.getenv('SECRET_KEY', 'your-secret-key-change-in-production')
+app.secret_key = os.getenv('SECRET_KEY', 'your-secret-key')
 CORS(app)
 
 logger = setup_logger(__name__)
@@ -241,7 +240,7 @@ def get_statistics():
 
 if __name__ == '__main__':
     port = int(os.getenv('PORT', 5000))
-    debug = os.getenv('FLASK_DEBUG', 'True') == 'True'
+    debug = os.getenv('FLASK_DEBUG', 'False') == 'True'  # Changed default to False
     
     logger.info(f"Starting Flask server on port {port}")
-    app.run(host='0.0.0.0', port=port, debug=debug)
+    app.run(host='0.0.0.0', port=port, debug=debug, use_reloader=False)  # Disable reloader
