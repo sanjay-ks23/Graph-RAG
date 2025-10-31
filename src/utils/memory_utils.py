@@ -2,16 +2,44 @@
 
 import torch
 import gc
+import os
+from functools import wraps
 from src.utils.logger import setup_logger
 
 logger = setup_logger(__name__)
 
 def clear_cuda_cache():
-    """Clear CUDA cache and run garbage collection"""
+    """Clear CUDA cache and run garbage collection aggressively"""
     if torch.cuda.is_available():
-        torch.cuda.empty_cache()
+        # Run garbage collection multiple times
         gc.collect()
-        logger.info("Cleared CUDA cache and ran garbage collection")
+        gc.collect()
+        
+        # Empty CUDA cache
+        torch.cuda.empty_cache()
+        
+        # Synchronize to ensure all operations are complete
+        torch.cuda.synchronize()
+        
+        # Run garbage collection again
+        gc.collect()
+
+def with_memory_cleanup(func):
+    """Decorator to automatically clean up memory before and after function execution"""
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        if torch.cuda.is_available():
+            gc.collect()
+            torch.cuda.empty_cache()
+        
+        result = func(*args, **kwargs)
+        
+        if torch.cuda.is_available():
+            gc.collect()
+            torch.cuda.empty_cache()
+        
+        return result
+    return wrapper
 
 def get_gpu_memory_info():
     """Get GPU memory information"""
